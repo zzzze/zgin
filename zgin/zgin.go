@@ -2,6 +2,7 @@ package zgin
 
 import (
 	"net/http"
+	"strings"
 )
 
 type HandlerFunc func(c *Context)
@@ -50,11 +51,22 @@ func (group *RouterGroup) POST(pattern string, handler HandlerFunc) {
 	group.addRoute(http.MethodPost, pattern, handler)
 }
 
+func (group *RouterGroup) Use(middlewares ...HandlerFunc) {
+  group.middlewares = append(group.middlewares, middlewares...)
+}
+
 func (engine *Engine) Run(addr string) error {
 	return http.ListenAndServe(addr, engine)
 }
 
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+  middlewares := make([]HandlerFunc, 0)
+  for _, g := range engine.groups {
+    if strings.HasPrefix(req.URL.Path, g.prefix) {
+      middlewares = append(middlewares, g.middlewares...)
+    }
+  }
 	c := newContext(w, req)
+  c.handlers = middlewares
 	engine.router.handle(c)
 }

@@ -18,6 +18,9 @@ type Context struct {
 	Params map[string]string
 	// response info
 	StatusCode int
+	// middleware
+	handlers []HandlerFunc
+	index    int
 }
 
 func newContext(w http.ResponseWriter, req *http.Request) *Context {
@@ -26,6 +29,15 @@ func newContext(w http.ResponseWriter, req *http.Request) *Context {
 		Req:    req,
 		Path:   req.URL.Path,
 		Method: req.Method,
+		index:  -1,
+	}
+}
+
+func (c *Context) Next() {
+	c.index++
+	l := len(c.handlers)
+	for ; c.index < l; c.index++ {
+		c.handlers[c.index](c)  // 巧妙！这样没有调用 c.Next 的 handler 执行完后也可以继续执行下个 handler。
 	}
 }
 
