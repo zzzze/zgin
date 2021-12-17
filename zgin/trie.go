@@ -5,10 +5,6 @@ import (
 	"strings"
 )
 
-// FIXME: 当前实现存在 bug， 应该改为以下方案之一：
-//     1. 通配符与普通名称冲突
-//     2. 通配符之间冲突，与普通名称共存
-
 type node struct {
 	pattern  string
 	part     string
@@ -45,16 +41,6 @@ func getWildNode(nodes []*node) *node {
 
 func isWild(part string) bool {
   return part[0] == ':' || part[0] == '*'
-}
-
-func (n *node) matchChildren(part string) []*node {
-	nodes := make([]*node, 0)
-	for _, child := range n.children {
-		if child.part == part || child.isWild {
-			nodes = append(nodes, child)
-		}
-	}
-	return nodes
 }
 
 func (n *node) insert(pattern string, parts []string, height int) {
