@@ -14,6 +14,10 @@ func main() {
 		// expect /hello?name=zhangsan
 		c.String(http.StatusOK, "hello %s, you're at %s\n", c.Query("name"), c.Path)
 	})
+	r.GET("/hello/:name", func(c *zgin.Context) {
+		// expect /hello/zhangsan
+		c.String(http.StatusOK, "hello %s, you're at %s\n", c.Params["name"], c.Path)
+	})
 	r.POST("/login", func(c *zgin.Context) {
 		c.JSON(http.StatusOK, zgin.H{
 			"username": c.PostForm("username"),
